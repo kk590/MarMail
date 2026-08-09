@@ -1,0 +1,6 @@
+streamlit
+duckduckgo-search
+requests
+langchain-core
+langchain-huggingface
+langgraph
