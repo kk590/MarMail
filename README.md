@@ -1,6 +1,6 @@
 # 📧 MarMail
 
-AI-Powered Multi-Agent Email Marketing Automation (Hackathon Demo)
+AI-Powered Multi-Agent Email Marketing Automation 
 
 MarMail is a multi-agent AI system that finds companies matching a target niche, enriches them with contact info, validates the data, and writes personalized outreach emails — all in one click.
 
@@ -97,15 +97,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Add your Hugging Face token
 
-Create `.streamlit/secrets.toml`:
-
-```toml
-HUGGINGFACE_API_KEY = "hf_your_token_here"
-```
-
-Get a free token at https://huggingface.co/settings/tokens — create a **Fine-grained** token and tick **Make calls to Inference Providers** under permissions.
 
 ### Run it
 
