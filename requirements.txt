@@ -2,5 +2,10 @@ streamlit
 duckduckgo-search
 requests
 langchain-core
+langchain-aws
 langchain-huggingface
 langgraph
+boto3
+psycopg2-binary
+mcp
+langchain-mcp-adapters
