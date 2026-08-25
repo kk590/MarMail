@@ -536,10 +536,11 @@ class DBModule:
 
 
 class EmailModule:
-    def __init__(self, llm, log, demo_mode: bool = False):
+    def __init__(self, llm, log, demo_mode: bool = False, niche: str = ""):
         self.llm = llm
         self.log = log
         self.demo_mode = demo_mode
+        self.niche = niche
 
     def run(self, leads: List[dict], offer: str, email_provider: str = "smtp") -> List[dict]:
         self.log("✉️ Email: personalizing & sending")
@@ -547,13 +548,39 @@ class EmailModule:
         for lead in leads:
             # ── Generate email ─────────────────────────────────
             if self.demo_mode:
-                subject = f"Quick question about {lead['company']}"
+                subject = f"Strengthening {lead['company']}'s market positioning"
+
+                observations = [
+                    f"your approach to {self.niche.lower()} stands out in a crowded market",
+                    f"the clarity of your product messaging on {lead['website']}",
+                    f"how {lead['company']} is positioning itself within the {self.niche.lower()} space",
+                    f"your brand's unique angle in the {self.niche.lower()} industry",
+                    f"the strong foundation you've built for {lead['company']}"
+                ]
+                observation = observations[hash(lead['company']) % len(observations)]
+                specific_area = offer.split(" for ")[-1] if " for " in offer else offer
+
                 body = (
-                    f"Hi {lead['company']} team,\n\n"
-                    f"I came across {lead['website']} and was impressed by your work in the space. "
-                    f"We're offering {offer} and I believe it could be a great fit. "
-                    f"Would you be open to a brief 10-minute chat next week?\n\n"
-                    f"Best regards"
+                    f"Hi there,\n\n"
+                    f"Most B2B companies don't have a product problem — they have a perception and positioning problem.\n\n"
+                    f"Your brand, positioning, target audience, value proposition, differentiation, marketing mix, "
+                    f"customer experience, consistency, brand equity, and storytelling all influence one thing:\n\n"
+                    f"Why should a customer choose you over the alternatives?\n\n"
+                    f"At MarMail, we help B2B teams strengthen that entire journey — from identifying the right audience "
+                    f"and sharpening your value proposition to creating messaging that consistently communicates what makes "
+                    f"{lead['company']} different.\n\n"
+                    f"A strong brand isn't just a logo. It's the perception customers carry about your company.\n\n"
+                    f"A strong positioning strategy makes that perception clear.\n\n"
+                    f"A strong value proposition gives them a reason to act.\n\n"
+                    f"And consistent storytelling turns that perception into trust.\n\n"
+                    f"I took a quick look at {lead['company']} and noticed {observation}.\n\n"
+                    f"I'd be happy to share a few ideas on how you could strengthen your positioning and messaging around {specific_area}.\n\n"
+                    f"Would you be open to a 15-minute conversation next week?\n\n"
+                    f"Best,\n"
+                    f"Alex Morgan\n"
+                    f"Growth Lead\n"
+                    f"MarMail\n"
+                    f"alex@marmail.ai"
                 )
             else:
                 prompt = (
@@ -617,11 +644,11 @@ class EmailModule:
 # ═══════════════════════════════════════════════════════════════
 
 class SequenceAgent:
-    def __init__(self, llm, log, demo_mode: bool = False):
+    def __init__(self, llm, log, demo_mode: bool = False, niche: str = ""):
         self.log = log
         self.leadgen = LeadGenModule(llm, log, demo_mode)
         self.db = DBModule(log)
-        self.email = EmailModule(llm, log, demo_mode)
+        self.email = EmailModule(llm, log, demo_mode, niche)
 
     def run(self, niche: str, offer: str, max_leads: int, email_provider: str) -> List[dict]:
         self.log("🧭 Sequence: starting pipeline")
@@ -727,7 +754,7 @@ def main():
                 if not demo_mode and aws_ok:
                     llm = build_llm(model_id, AWS_REGION)
 
-                seq = SequenceAgent(llm, log, demo_mode)
+                seq = SequenceAgent(llm, log, demo_mode, niche)
                 leads = seq.run(niche, offer, max_leads, email_provider)
                 status.update(label="✅ Pipeline Complete!", state="complete", expanded=False)
             except Exception as e:
@@ -766,7 +793,7 @@ def main():
                     f"Delivery: {lead.get('delivery_status','')}",
                     "-" * 40,
                 ]
-            report = ".join(report_lines)"
+            report = "\n".join(report_lines)
             st.download_button(
                 "📥 Download Campaign Report",
                 report,
